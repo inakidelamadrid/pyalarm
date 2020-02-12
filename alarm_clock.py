@@ -13,6 +13,13 @@ You can set the possible youtube videos in a config file
 #  import webbrowser
 
 
+def convert_to_seconds(alarm_time_parts):
+    seconds_hms = [3600, 60, 1]  # Number of seconds in an Hour, Minute, and Second
+    return sum(
+        [a * b for a, b in zip(seconds_hms[: len(alarm_time_parts)], alarm_time_parts)]
+    )
+
+
 def valid_hours(hours):
     return hours < 24 and hours >= 0
 
@@ -44,10 +51,7 @@ def hours_and_minutes_and_seconds(alarm_time):
 
 def check_alarm_input(alarm_time):
     """Checks to see if the user has entered in a valid alarm time"""
-    return (
-        hours_and_minutes(alarm_time)
-        or hours_and_minutes_and_seconds(alarm_time)
-    )
+    return hours_and_minutes(alarm_time) or hours_and_minutes_and_seconds(alarm_time)
 
 
 if __name__ == "__main__":
@@ -59,6 +63,9 @@ if __name__ == "__main__":
             ALARM_TIME = [int(n) for n in ALARM_INPUT.split(":")]
             if check_alarm_input(ALARM_TIME):
                 print("You entered a valid alarm")
+                print(
+                    f"Alarm set to trigger at {convert_to_seconds(ALARM_TIME)} seconds of the day"
+                )
                 break
             raise ValueError
         except ValueError:
