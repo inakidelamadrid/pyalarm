@@ -6,11 +6,11 @@ When the alarm goes off, a sound will be played or a youtube video opened
 You can set the possible youtube videos in a config file
 """
 
-#  import datetime
+import datetime
 #  import os
-#  import time
-#  import random
-#  import webbrowser
+import time
+import random
+import webbrowser
 
 
 def convert_to_seconds(alarm_time_parts):
@@ -19,6 +19,22 @@ def convert_to_seconds(alarm_time_parts):
         [a * b for a, b in zip(seconds_hms[: len(alarm_time_parts)], alarm_time_parts)]
     )
 
+
+def get_time_diff_seconds_from_now(alarm_time_parts):
+    alarm_seconds = convert_to_seconds(alarm_time_parts)
+    print(f"Alarm set to trigger at {alarm_seconds} seconds of the day")
+    now = datetime.datetime.now()
+    current_time_seconds = convert_to_seconds([now.hour, now.minute, now.second])
+    print(f"Current time seconds are: {current_time_seconds}")
+    return alarm_seconds - current_time_seconds
+
+def open_random_video():
+    # Load list of possible video URLs
+    with open("youtube_alarm_videos.txt", "r") as alarm_file:
+        videos = alarm_file.readlines()
+
+    # Open a random video from the list
+    webbrowser.open(random.choice(videos))
 
 def valid_hours(hours):
     return hours < 24 and hours >= 0
@@ -62,11 +78,20 @@ if __name__ == "__main__":
         try:
             ALARM_TIME = [int(n) for n in ALARM_INPUT.split(":")]
             if check_alarm_input(ALARM_TIME):
-                print("You entered a valid alarm")
+                time_diff_seconds = get_time_diff_seconds_from_now(ALARM_TIME)
                 print(
-                    f"Alarm set to trigger at {convert_to_seconds(ALARM_TIME)} seconds of the day"
+                    "Alarm set to go off in %s"
+                    % datetime.timedelta(seconds=time_diff_seconds)
                 )
+
+                # Sleep until the alarm goes off
+                time.sleep(time_diff_seconds)
+
+                # Time for the alarm to go off
+                print("Wake Up!")
+                open_random_video()
                 break
-            raise ValueError
+            else:
+                raise ValueError
         except ValueError:
             print("ERROR: Enter time in HH:MM or HH:MM:SS format")
